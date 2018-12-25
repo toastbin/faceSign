@@ -1,7 +1,7 @@
 <template>
   <div style="padding-top:40px;padding-bottom:50px">
     <div id="line" v-show="ifShow" @click="ifShow = false"></div>
-    <mt-header fixed title="七期软件"></mt-header>
+    <mt-header fixed :title="header"></mt-header>
     <div class="qd_table">
       <el-select :value="tit" :placeholder="'请选择周数 本周是第' + weeks + '周'">
         <el-option
@@ -51,7 +51,8 @@ export default {
       weeks: "",
       week: '0',
       tit: '',
-      id: this.$route.params.id
+      id: this.$route.params.id,
+      header: ''
     };
   },
   methods: {
@@ -70,6 +71,7 @@ export default {
         .then(res => {
           this.tableData = res.data.signItemList;
           this.week = res.data.week
+          console.log(this.week);
           this.tit = '第' + res.data.week + '周';
         });  
     },
@@ -82,19 +84,19 @@ export default {
       const width = window.innerHeight / 2;
       this.ifShow = true;
       line.style.height = width + "px";
-      line.style.marginTop = -width / 2 + "px";
+      line.style.marginTop = width / 2 - 40 + "px";
       let weekArr = [];
       for (let i in weeks) {
         weekArr.push(weeks[i]);
       }
-      let date = new Date();
-      let week = date.getDay() == 0 ? 7 : date.getDay();
+      // let date = new Date();
+      // let week = date.getDay() == 0 ? 7 : date.getDay();
       // console.log(week);
       let sum = weekArr.reduce((a, b) => {
         return a + b;
       });
       sum = sum.toFixed(2);
-      let ave = sum / week;
+      let ave = sum / 7;
       ave = ave.toFixed(2);
 
       line.style.display = "block";
@@ -104,7 +106,7 @@ export default {
         title: {
           text: `${name}同学,到今天,您平均每天签到${ave}小时`,
           textStyle: {
-            fontSize: 14,
+            fontSizen: 14,
             color: "black"
           },
           left: "center"
@@ -172,7 +174,7 @@ export default {
       ;*/
       myChart.setOption({
         title: {
-          text: `${name}同学,您${this.week==0?'这':'第'+this.week}周平均每天签到${ave}小时`,
+          text: `${name}同学,您${this.week==0?'本':'第'+this.week}周平均每天签到${ave}小时`,
           textStyle: {
             fontSize: 14,
             color: "black"
@@ -215,14 +217,26 @@ export default {
         window.pageYOffset ||
         document.documentElement.scrollTop ||
         document.body.scrollTop;
-      var x = window.outerHeight / 2;
+      var x = window.outerHeight / 2 ;
       if (this.ifShow && line) {
-        line.style.top = scrollTop + x + "px";
+        // line.style.top = scrollTop + x + "px";
+        line.style.transform = "translateY( " + scrollTop + "px)"
+      }
+    },
+    setTitle(){
+      switch(this.id){
+        case '0701': this.header = '七期软件';break;
+        case '0702': this.header = '七期UI';break;
+        case '0601': this.header = '六期软件';break;
+        case '0602': this.header = '六期UI';break;
+        case '0801': this.header = '八期软件';break;
+        case '0802': this.header = '八期UI';break;
       }
     }
   },
   created() {
     this.getUrl(this.week);
+    this.setTitle();
   },
   mounted() {
 
