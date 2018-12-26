@@ -21,7 +21,7 @@ module.exports = {
       { test: /\.less$/ , use: ['vue-style-loader', 'css-loader','less-loader'] },
       { test:/\.(ttf|eot|svg|woff|woff2|otf)$/, use: 'url-loader'},
       { test:/\.(jpg|png|gif)$/, use: 'url-loader?limit=100&name=[hash:8]-[name].[ext]'},
-      { test: /\.js$/, use: 'babel-loader', exclude: 'node_modules' }
+      // { test: /\.js$/, use: 'babel-loader', exclude: 'node_modules' }
     ]
   },
   resolve: {
