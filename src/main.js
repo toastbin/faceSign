@@ -49,4 +49,3 @@ const vm = new Vue({
   router,
 
 });
-
