@@ -5,7 +5,8 @@
   "main": "webpack.config.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dev-server --open --port 3010 --contentBase src --hot --mode development"
+    "dev": "webpack-dev-server --open --port 3010 --contentBase src --hot --mode development",
+    "build": "webpack --mode production"
   },
   "keywords": [],
   "author": "",

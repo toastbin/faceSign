@@ -2,6 +2,7 @@
 import VueRouter  from 'vue-router'
 import tableData from './components/tableData.vue'
 import home from './components/home.vue'
+import look from './components/look.vue'
 // 创建 路由对象
 
 const router = new VueRouter({
@@ -10,6 +11,7 @@ const router = new VueRouter({
     { path: '/home' , component: home },
     // 路由里面:id 的属性传去一个id值
     { path: '/tableData/:id' , component: tableData },
+    { path: '/look' , component: look },
   ],
   linkActiveClass: 'mui-active'
 })

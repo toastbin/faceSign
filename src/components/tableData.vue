@@ -1,5 +1,9 @@
 <template>
   <div style="padding-top:40px;padding-bottom:50px">
+    <div class="loading" v-show="loading">
+      <load></load>
+      <!-- <div class="text">网络似乎不太好</div> -->
+    </div>
     <div id="line" v-show="ifShow" @click="ifShow = false"></div>
     <mt-header fixed :title="header"></mt-header>
     <div class="qd_table">
@@ -14,6 +18,7 @@
       <table
         class="table table-bordered table-hover table-striped"
         style="text-align: center;vertical-align: middle;"
+        v-show="!loading"
       >
         <thead>
           <tr>
@@ -42,6 +47,8 @@
   </div>
 </template>
 <script>
+import { px2rem } from "../utils/utils";
+import load from "./common/loading.vue";
 export default {
   data() {
     return {
@@ -49,36 +56,44 @@ export default {
       can: true,
       ifShow: false,
       weeks: "",
-      week: '0',
-      tit: '',
+      week: "0",
+      tit: "",
       id: this.$route.params.id,
-      header: ''
+      header: "",
+      loading: true
     };
+  },
+  components: {
+    load
   },
   methods: {
     getUrl() {
       this.$axios
         // 用 $route.params.id 获取当前路由
-        .get("/group?week="+this.week+"&group_id=" + this.id)
+        .get("/group?week=" + this.week + "&group_id=" + this.id)
         .then(res => {
+          this.loading = false;
+          console.log(res);
           this.tableData = res.data.signItemList;
           this.weeks = res.data.week;
         });
     },
-    changeUrl(item){
-       this.$axios
-        .get("/group?week="+item+"&group_id=" + this.id)
+    changeUrl(item) {
+      this.loading = true;
+      this.$axios
+        .get("/group?week=" + item + "&group_id=" + this.id)
         .then(res => {
+          this.loading = false;
+          console.log(res);
           this.tableData = res.data.signItemList;
-          this.week = res.data.week
+          this.week = res.data.week;
           console.log(this.week);
-          this.tit = '第' + res.data.week + '周';
-        });  
+          this.tit = "第" + res.data.week + "周";
+        });
     },
-    test(item){
+    test(item) {
       console.log(item);
-    }
-    ,
+    },
     drawLine(name, weeks) {
       const line = document.querySelector("#line");
       const width = window.innerHeight / 2;
@@ -101,80 +116,11 @@ export default {
 
       line.style.display = "block";
       let myChart = this.$echarts.init(line);
-      /*
       myChart.setOption({
         title: {
-          text: `${name}同学,到今天,您平均每天签到${ave}小时`,
-          textStyle: {
-            fontSizen: 14,
-            color: "black"
-          },
-          left: "center"
-        },
-        tooltip: {},
-        xAxis: {
-          data: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
-        },
-        yAxis: {
-          axisLabel: {
-            formatter: "{value}时"
-          }
-        },
-        series: [
-          {
-            name: "签到时间",
-            type: "line",
-            data: weekArr,
-            markPoint: {
-              data: [
-                { type: "max", name: "最大值" },
-                { type: "min", name: "最小值" }
-              ]
-            },
-            markLine: {
-              data: [{ type: "average", name: "平均值" }]
-            },
-            itemStyle: {
-              normal: {
-                borderWidth: 3,
-                borderColor: "yellow",
-                color: {
-                  type: "linear",
-                  x: 0,
-                  y: 0,
-                  x2: 0,
-                  y2: 1,
-                  colorStops: [
-                    {
-                      offset: 0,
-                      color: "red" // 0% 处的颜色
-                    },
-                    {
-                      offset: 1,
-                      color: "red" // 100% 处的颜色
-                    }
-                  ],
-                  globalCoord: false // 缺省为 false
-                }
-              }
-            },
-            lineStyle: {
-              normal: {
-                color: "red",
-                width: 3,
-                type: "solid"
-              }
-            },
-            areaStyle: {
-              color: "lightcyan"
-            }
-          }
-        ]
-      })
-      ;*/
-      myChart.setOption({
-        title: {
-          text: `${name}同学,您${this.week==0?'本':'第'+this.week}周平均每天签到${ave}小时`,
+          text: `${name}同学,您${
+            this.week == 0 ? "本" : "第" + this.week
+          }周平均每天签到${ave}小时`,
           textStyle: {
             fontSize: 14,
             color: "black"
@@ -217,30 +163,46 @@ export default {
         window.pageYOffset ||
         document.documentElement.scrollTop ||
         document.body.scrollTop;
-      var x = window.outerHeight / 2 ;
+      var x = window.outerHeight / 2;
       if (this.ifShow && line) {
-        // line.style.top = scrollTop + x + "px";
-        line.style.transform = "translateY( " + scrollTop + "px)"
+        line.style.transform = "translateY( " + scrollTop + "px)";
       }
     },
-    setTitle(){
-      switch(this.id){
-        case '0701': this.header = '七期软件';break;
-        case '0702': this.header = '七期UI';break;
-        case '0601': this.header = '六期软件';break;
-        case '0602': this.header = '六期UI';break;
-        case '0801': this.header = '八期软件';break;
-        case '0802': this.header = '八期UI';break;
+    setTitle() {
+      switch (this.id) {
+        case "0701":
+          this.header = "七期软件";
+          break;
+        case "0702":
+          this.header = "七期UI";
+          break;
+        case "0703":
+          this.header = "七期硬件";
+          break;
+        case "0601":
+          this.header = "六期软件";
+          break;
+        case "0602":
+          this.header = "六期UI";
+          break;
+        case "0603":
+          this.header = "六期硬件";
+          break;
+        case "0801":
+          this.header = "八期软件";
+          break;
+        case "0802":
+          this.header = "八期UI";
+          break;
+        case "0803":
+          this.header = "八期硬件";
+          break;
       }
     }
   },
   created() {
     this.getUrl(this.week);
-    this.setTitle();
-  },
-  mounted() {
-
-    // 函数节流  监听滚动
+    this.setTitle(this.id);
     window.addEventListener("scroll", () => {
       if (!this.can) {
         return;
@@ -251,11 +213,14 @@ export default {
         this.can = true;
       }, 400);
     });
+  },
+  mounted() {
+    // 函数节流  监听滚动
   }
 };
 </script>
 <style lang="less" scoped>
-.el-select{
+.el-select {
   width: 100%;
   margin-top: 5px;
 }
@@ -263,18 +228,18 @@ table {
   thead {
     tr {
       th {
-        font-size: 14px;
+        font-size: 0.4rem;
         text-align: center;
         vertical-align: middle;
-        padding: 0.5rem;
+        padding: 0.2rem;
       }
     }
   }
   tbody {
     td {
-      font-size: 14px;
+      font-size: 0.35rem;
       vertical-align: middle;
-      padding: 0.5rem;
+      padding: 0.3rem 0.2rem 0.3rem 0.2rem;
     }
   }
 }
@@ -284,5 +249,19 @@ table {
   position: absolute;
   transition: all 0.2s;
   z-index: 10000;
+}
+.loading {
+  position: absolute;
+  z-index: 5;
+  top: 50%;
+  left: 50%;
+  margin-left: -0.84rem;
+  margin-top: -0.58rem;
+  width: 1.68rem;
+  height: 1.06rem;
+  // background: pink;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
