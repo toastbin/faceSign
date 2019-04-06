@@ -1,50 +1,55 @@
 <template>
-  <div style="padding-top:40px;padding-bottom:50px">
-    <div class="loading" v-show="loading">
-      <load></load>
-      <!-- <div class="text">网络似乎不太好</div> -->
-    </div>
-    <div id="line" v-show="ifShow" @click="ifShow = false"></div>
-    <mt-header fixed :title="header"></mt-header>
-    <div class="qd_table">
-      <el-select :value="tit" :placeholder="'请选择周数 本周是第' + weeks + '周'">
-        <el-option
-          v-for="(item,index) in weeks"
-          :key="index"
-          :value=" '第' + item + '周' "
-          @click.native="changeUrl(item)"
-        ></el-option>
-      </el-select>
-      <table
-        class="table table-bordered table-hover table-striped"
-        style="text-align: center;vertical-align: middle;"
-        v-show="!loading"
-      >
-        <thead>
-          <tr>
-            <th style="width:20%;">姓名</th>
-            <th>周一</th>
-            <th>周二</th>
-            <th>周三</th>
-            <th>周四</th>
-            <th>周五</th>
-            <th>周六</th>
-            <th>周日</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(item,index) in tableData"
+  <transition name="h" mode="out-in">
+    <div style="padding-top:40px;padding-bottom:50px;width:100%;height:100%;">
+      <div class="loading" v-show="loading">
+        <load></load>
+        <!-- <div class="text">网络似乎不太好</div> -->
+      </div>
+      <div id="line" v-show="ifShow" @click="ifShow = false"></div>
+      <mt-header fixed :title="header"></mt-header>
+      <div class="qd_table">
+        <el-select :value="tit" :placeholder="'请选择周数 本周是第' + weeks + '周'">
+          <el-option
+            v-for="(item,index) in weeks"
             :key="index"
-            @click="drawLine(item.user_info,item.weekMap),setTop()"
-          >
-            <td>{{item.user_info}}</td>
-            <td v-for="(item,index) in item.weekMap" :key="index">{{item }}</td>
-          </tr>
-        </tbody>
-      </table>
+            :value=" '第' + item + '周' "
+            @click.native="changeUrl(item)"
+          ></el-option>
+        </el-select>
+        <table
+          class="table table-bordered table-hover table-striped"
+          style="text-align: center;vertical-align: middle;"
+          v-show="!loading"
+        >
+          <thead>
+            <tr>
+              <th style="width:20%;" @click="daySort(8)" :class="{'selected': currentDay === 8}">姓名</th>
+              <th
+                v-for="(item,index) in weekList"
+                :key="index"
+                @click="daySort(index+1)"
+                :class="{'selected': currentDay === index+1}"
+              >{{item}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(item,index) in tableData"
+              :key="index"
+              @click="drawLine(item.user_info,item.weekMap),setTop()"
+            >
+              <td style="border-left:none">{{item.user_info}}</td>
+              <td
+                v-for="(item,index) in item.weekMap"
+                :key="index"
+                :style="{' border-right:none': index===6}"
+              >{{item }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
+  </transition>
 </template>
 <script>
 import { px2rem } from "../utils/utils";
@@ -60,7 +65,9 @@ export default {
       tit: "",
       id: this.$route.params.id,
       header: "",
-      loading: true
+      loading: true,
+      currentDay: new Date().getDay(),
+      weekList: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     };
   },
   components: {
@@ -70,29 +77,53 @@ export default {
     getUrl() {
       this.$axios
         // 用 $route.params.id 获取当前路由
-        .get("/group?week=" + this.week + "&group_id=" + this.id)
+        .get("sel/group?week=" + this.week + "&group_id=" + this.id)
         .then(res => {
-          this.loading = false;
           console.log(res);
+          this.loading = false;
           this.tableData = res.data.signItemList;
           this.weeks = res.data.week;
+          this.tableData.sort(this.getSortEveryDay(this.currentDay));
+          this.addSum();
         });
     },
     changeUrl(item) {
       this.loading = true;
       this.$axios
-        .get("/group?week=" + item + "&group_id=" + this.id)
+        .get("sel/group?week=" + item + "&group_id=" + this.id)
         .then(res => {
           this.loading = false;
-          console.log(res);
           this.tableData = res.data.signItemList;
           this.week = res.data.week;
-          console.log(this.week);
           this.tit = "第" + res.data.week + "周";
+          this.tableData.sort(this.getSortEveryDay(this.currentDay));
+          this.addSum();
+          console.log(this.tableData);
         });
     },
-    test(item) {
-      console.log(item);
+    getSum(j) {
+      let arr = [];
+      for (var i in this.tableData[j].weekMap) {
+        arr.push(this.tableData[j].weekMap[i]);
+      }
+      let sum = arr.reduce((prev, cur) => {
+        return prev + cur;
+      });
+      return sum;
+    },
+    addSum() {
+      this.tableData.forEach((item, index) => {
+        item.allTime = this.getSum(index);
+      });
+    },
+    daySort(day) {
+      if (day === 8) {
+        this.currentDay = 8;
+        this.tableData.sort(this.getSortAllWeek());
+        return;
+      }
+      this.currentDay = day;
+      this.tableData.sort(this.getSortEveryDay(this.currentDay));
     },
     drawLine(name, weeks) {
       const line = document.querySelector("#line");
@@ -104,9 +135,6 @@ export default {
       for (let i in weeks) {
         weekArr.push(weeks[i]);
       }
-      // let date = new Date();
-      // let week = date.getDay() == 0 ? 7 : date.getDay();
-      // console.log(week);
       let sum = weekArr.reduce((a, b) => {
         return a + b;
       });
@@ -120,9 +148,9 @@ export default {
         title: {
           text: `${name}同学,您${
             this.week == 0 ? "本" : "第" + this.week
-          }周平均每天签到${ave}小时`,
+          }周平均每天签到${ave}h,共计${sum}h`,
           textStyle: {
-            fontSize: 14,
+            fontSize: 13,
             color: "black"
           },
           left: "center"
@@ -198,6 +226,28 @@ export default {
           this.header = "八期硬件";
           break;
       }
+    },
+    getSortEveryDay(attr) {
+      return (obj1, obj2) => {
+        if (obj1.weekMap[`week${attr}`] > obj2.weekMap[`week${attr}`]) {
+          return -1;
+        } else if (obj1.weekMap[`week${attr}`] == obj2.weekMap[`week${attr}`]) {
+          return 0;
+        } else {
+          return 1;
+        }
+      };
+    },
+    getSortAllWeek() {
+      return (obj1, obj2) => {
+        if (obj1.allTime > obj2.allTime) {
+          return -1;
+        } else if (obj1.allTime == obj2.allTime) {
+          return 0;
+        } else {
+          return 1;
+        }
+      };
     }
   },
   created() {
@@ -214,9 +264,7 @@ export default {
       }, 400);
     });
   },
-  mounted() {
-    // 函数节流  监听滚动
-  }
+  mounted() {}
 };
 </script>
 <style lang="less" scoped>
@@ -227,11 +275,18 @@ export default {
 table {
   thead {
     tr {
+      .selected {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        color: #666;
+        font-weight: 800;
+      }
       th {
         font-size: 0.4rem;
         text-align: center;
         vertical-align: middle;
         padding: 0.2rem;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        transition: all 0.2s linear;
       }
     }
   }
@@ -240,6 +295,7 @@ table {
       font-size: 0.35rem;
       vertical-align: middle;
       padding: 0.3rem 0.2rem 0.3rem 0.2rem;
+      border: 1px solid rgba(0, 0, 0, 0.2);
     }
   }
 }
@@ -259,9 +315,22 @@ table {
   margin-top: -0.58rem;
   width: 1.68rem;
   height: 1.06rem;
-  // background: pink;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.h-enter,
+.h-leave-to {
+  // transform: translate3d(0, -100%, 0);
+  opacity: 0;
+}
+.h-enter-to,
+.h-leave {
+  // transform: translate3d(0, 0, 0);
+  opacity: 1;
+}
+.h-enter-active,
+.h-leave-active {
+  transition: all 0.3s linear;
 }
 </style>
