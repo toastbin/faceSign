@@ -1,6 +1,6 @@
 <template>
   <transition name="h" mode="out-in">
-    <div style="padding-top:40px;padding-bottom:50px;width:100%;height:100%;">
+    <div style="padding-top:40px;padding-bottom:50px;width:100%;height:100%;display:flex">
       <div class="loading" v-show="loading">
         <load></load>
         <!-- <div class="text">网络似乎不太好</div> -->
@@ -66,7 +66,7 @@ export default {
       id: this.$route.params.id,
       header: "",
       loading: true,
-      currentDay: new Date().getDay(),
+      currentDay: new Date().getDay() === 0 ? 7 :new Date().getDay(),
       weekList: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     };
   },
@@ -272,7 +272,13 @@ export default {
   width: 100%;
   margin-top: 5px;
 }
+.qd_table{
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+}
 table {
+  flex:1;
   thead {
     tr {
       .selected {
