@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #签到系统
 
 ###点击跳转到查看签到的表格
@@ -13,3 +14,7 @@
           this.tableData = res.data.signItemList;
         });
     },
+=======
+# faceSign
+face
+>>>>>>> 63d089711423b3619b176e9eba94c7105cc9bbc3
