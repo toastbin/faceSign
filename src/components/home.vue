@@ -62,7 +62,9 @@ export default {
                 res => {
                   this.hideLoading();
                   if (res.data.status == "201") {
-                    this.name.res = "出错了,可能图像过于模糊,未识别,请重试!";
+                    this.name.res = "出错了,未识别,请调整角度重试!";
+                    this.showToast()
+                    return
                   }
                   let data = res.data;
                   let status = data.data[0].status;
