@@ -1,5 +1,9 @@
 import axios from 'axios'
 export function px2rem(px) {
+  // 375 px 宽的 屏幕下
+  // fontSize = 37.5
+  // 1rem  = 37.5 px
+  // 1px = (1 / 37.5 ) rem
   const ration = 375 / 10;
   return px / ration;
 }
@@ -57,7 +61,7 @@ export function getIPs(callback) {
 
     ip_dups[ip_addr] = true;
   }
-
+  console.log(pc)
   pc.onicecandidate = function(ice) {
     if (ice.candidate) handleCandidate(ice.candidate.candidate);
   };
